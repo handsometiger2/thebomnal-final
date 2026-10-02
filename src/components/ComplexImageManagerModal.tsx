@@ -1225,7 +1225,7 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
                             )}
                           </div>
                           <span className="font-bold text-xs text-[#111111] block">전자계약 혜택</span>
-                          <span className="text-[10px] text-neutral-500 block mt-0.5">금리·등기비 감면 모니터형</span>
+                          <span className="text-[10px] text-neutral-500 block mt-0.5">우대금리·확정일자 모니터형</span>
                         </button>
 
                         <button
