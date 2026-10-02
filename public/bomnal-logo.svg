@@ -1,0 +1,27 @@
+<svg viewBox="0 0 160 200" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#C2006A" stroke-width="6.5" stroke-linecap="square" stroke-linejoin="miter">
+  <!-- 1. Roof left & horizontal floor for 보 -->
+  <path d="M 80 12 L 14 54 L 14 100 L 74 100" />
+  
+  <!-- 2. Roof right & upper right wall -->
+  <path d="M 80 12 L 146 54 L 146 100" />
+
+  <!-- 3. ㅂ (Bieup): left ear+leg, right ear+leg, crossbar -->
+  <path d="M 22 52 L 32 66 L 32 100" />
+  <path d="M 66 52 L 56 66 L 56 100" />
+  <path d="M 32 82 L 56 82" />
+
+  <!-- 4. ㅁ (Mieum): square -->
+  <rect x="26" y="116" width="34" height="30" stroke-width="6.5" />
+
+  <!-- 5. ㄴ (Nieun) -->
+  <path d="M 88 78 L 88 126 L 118 126" />
+
+  <!-- 6. ㅏ (Ah): angled top + vertical stem -->
+  <path d="M 122 66 L 132 78 L 132 126" />
+
+  <!-- 7. ㄹ (Rieul) -->
+  <path d="M 98 144 L 136 144 L 136 156 L 98 156 L 98 172 L 136 172" />
+
+  <!-- 8. Lower house U-frame -->
+  <path d="M 14 126 L 14 186 L 146 186 L 146 126" />
+</svg>

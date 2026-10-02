@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "ComplexImage": {
+      "title": "ComplexImage",
+      "description": "Custom representative image for an apartment complex",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The complex ID" },
+        "imageData": { "type": "string", "description": "Optimized image data (base64 DataURL or URL)" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp of last update" }
+      },
+      "required": ["id", "imageData"]
+    },
+    "HeroImage": {
+      "title": "HeroImage",
+      "description": "Custom slide image for the main hero section",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "The hero slide ID" },
+        "imageData": { "type": "string", "description": "Optimized image data (base64 DataURL or URL)" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp of last update" }
+      },
+      "required": ["id", "imageData"]
+    },
+    "ComplexComment": {
+      "title": "ComplexComment",
+      "description": "Custom briefing commentary per apartment complex written by the realtor",
+      "type": "object",
+      "properties": {
+        "complexId": { "type": "string", "description": "The complex ID" },
+        "comment1": { "type": "string", "description": "First paragraph of briefing commentary" },
+        "comment2": { "type": "string", "description": "Second paragraph of briefing commentary" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Timestamp of last update" }
+      },
+      "required": ["complexId"]
+    }
+  },
+  "firestore": {
+    "/complex_images/{imageId}": {
+      "schema": "ComplexImage",
+      "description": "Stores custom photos for apartment complexes"
+    },
+    "/hero_images/{heroId}": {
+      "schema": "HeroImage",
+      "description": "Stores custom photos for hero slideshow"
+    },
+    "/complex_comments/{commentId}": {
+      "schema": "ComplexComment",
+      "description": "Stores customized realtor briefing commentary per complex"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+<svg viewBox="0 0 200 240" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="#C2006A" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter">
+  <!-- House Roof & Upper Left Floor -->
+  <path d="M 100 24 L 20 74 L 20 126 L 94 126" />
+  <path d="M 100 24 L 180 74 L 180 126" />
+
+  <!-- ㅂ (Bieup) -->
+  <path d="M 32 62 L 44 76 L 44 126" />
+  <path d="M 86 62 L 74 76 L 74 126" />
+  <path d="M 44 102 L 74 102" />
+
+  <!-- ㅁ (Mieum) -->
+  <rect x="36" y="142" width="42" height="42" stroke-width="8" />
+
+  <!-- ㄴ (Nieun) -->
+  <path d="M 106 118 L 106 156 L 142 156" />
+
+  <!-- ㅏ (Ah) -->
+  <path d="M 152 98 L 166 110 L 166 156" />
+
+  <!-- ㄹ (Rieul) -->
+  <path d="M 128 172 L 168 172 L 168 186 L 128 186 L 128 200 L 168 200" />
+
+  <!-- Lower House Basin -->
+  <path d="M 20 162 L 20 220 L 180 220 L 180 162" />
+</svg>

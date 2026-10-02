@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-serif-luxury: 'Cinzel', 'Cormorant Garamond', serif;
+    --font-korean-serif: 'Noto Serif KR', serif;
+    --font-sans: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: #FAF8F5;
+    color: #141414;
+    overflow-x: clip;
+  }
+}
+
+.font-serif-luxury {
+  font-family: 'Cinzel', 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-korean-serif {
+  font-family: 'Noto Serif KR', serif;
+}
+
+.font-sans-clean {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Luxury hairline borders & accents */
+.border-gold-subtle {
+  border-color: rgba(197, 168, 128, 0.25);
+}
+
+.bg-burgundy-luxury {
+  background-color: #7A0016;
+}
+
+.text-burgundy-luxury {
+  color: #7A0016;
+}
+
+.bg-charcoal-luxury {
+  background-color: #141414;
+}
+
+.bg-cream-luxury {
+  background-color: #FAF8F5;
+}
+

@@ -1,0 +1,6 @@
+{
+  "name": "봄날공인중개사사무소",
+  "description": "대구 달서구 월성동 e편한세상월배 단지내상가 B103호 봄날공인중개사사무소. 장순조 대표의 11년 무사고 안심 책임중개 및 신월성 아파트 단지 정보 안내.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

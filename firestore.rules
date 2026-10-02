@@ -1,0 +1,29 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /complex_images/{imageId} {
+      allow read: if true;
+      allow write: if request.resource.data.id is string 
+                   && request.resource.data.imageData is string;
+    }
+
+    match /hero_images/{heroId} {
+      allow read: if true;
+      allow write: if request.resource.data.id is string 
+                   && request.resource.data.imageData is string;
+    }
+
+    match /complex_comments/{commentId} {
+      allow read: if true;
+      allow write: if request.resource.data.complexId is string;
+    }
+
+    match /admin_settings/{settingId} {
+      allow read, write: if true;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
