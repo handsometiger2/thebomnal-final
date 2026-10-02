@@ -389,4 +389,54 @@ export async function savePopupConfigToCloud(config: PopupNoticeConfig): Promise
   } catch (_) {}
 }
 
+// ----------------------------------------------------
+// Custom Open Graph (KakaoTalk / SNS Share Thumbnail)
+// ----------------------------------------------------
+export async function saveOgShareImageToCloud(dataUrl: string): Promise<string> {
+  // 1. Try local server endpoint to overwrite public/og-image.jpg and public/card1.jpg
+  try {
+    const res = await fetch('/api/upload-og-image', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dataUrl }),
+    });
+    if (res.ok) {
+      console.log('Saved OG image to server file system');
+    }
+  } catch (err) {
+    console.warn('Failed to upload to /api/upload-og-image:', err);
+  }
+
+  // 2. Save to Firestore for permanent persistence
+  try {
+    await setDoc(doc(db, 'admin_settings', 'og_share'), {
+      imageUrl: dataUrl,
+      updatedAt: new Date().toISOString(),
+    }, { merge: true });
+  } catch (err) {
+    console.warn('Failed to save OG image to Firestore:', err);
+  }
+
+  // 3. Save to localStorage cache
+  try {
+    localStorage.setItem('bomnal_custom_og_image', dataUrl);
+  } catch (_) {}
+
+  return `/og-image.jpg?v=${Date.now()}`;
+}
+
+export async function loadOgShareImageFromCloud(): Promise<string | null> {
+  try {
+    const snap = await getDoc(doc(db, 'admin_settings', 'og_share'));
+    if (snap.exists() && snap.data().imageUrl) {
+      return snap.data().imageUrl;
+    }
+  } catch (_) {}
+  try {
+    const cached = localStorage.getItem('bomnal_custom_og_image');
+    if (cached) return cached;
+  } catch (_) {}
+  return null;
+}
+
 

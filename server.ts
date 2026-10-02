@@ -185,6 +185,45 @@ app.get('/api/hero-images', (req, res) => {
   }
 });
 
+// API: Upload custom OG Share Image (KakaoTalk / SNS thumbnail)
+app.post('/api/upload-og-image', (req, res) => {
+  try {
+    const { dataUrl } = req.body;
+    if (!dataUrl) {
+      return res.status(400).json({ error: 'Missing dataUrl' });
+    }
+    const matches = dataUrl.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      return res.status(400).json({ error: 'Invalid dataUrl format' });
+    }
+    const buffer = Buffer.from(matches[2], 'base64');
+    
+    // Save to public
+    const pubOgJpg = path.resolve(__dirname, 'public', 'og-image.jpg');
+    const pubOgPng = path.resolve(__dirname, 'public', 'og-image.png');
+    const pubCard1 = path.resolve(__dirname, 'public', 'card1.jpg');
+    fs.writeFileSync(pubOgJpg, buffer);
+    fs.writeFileSync(pubOgPng, buffer);
+    fs.writeFileSync(pubCard1, buffer);
+
+    // Also sync to dist if present
+    const distDir = path.resolve(__dirname, 'dist');
+    if (fs.existsSync(distDir)) {
+      try {
+        fs.writeFileSync(path.resolve(distDir, 'og-image.jpg'), buffer);
+        fs.writeFileSync(path.resolve(distDir, 'og-image.png'), buffer);
+        fs.writeFileSync(path.resolve(distDir, 'card1.jpg'), buffer);
+      } catch (_) {}
+    }
+
+    console.log('[Upload] Saved custom og-image / card1 successfully');
+    return res.json({ success: true, imageUrl: `/og-image.jpg?v=${Date.now()}` });
+  } catch (err: any) {
+    console.error('OG image upload error:', err);
+    return res.status(500).json({ error: err.message || 'Internal server error' });
+  }
+});
+
 async function startServer() {
   if (process.env.NODE_ENV === 'production') {
     app.use(express.static(path.resolve(__dirname, 'dist')));

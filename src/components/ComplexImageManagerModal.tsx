@@ -20,7 +20,8 @@ import {
   Building2,
   Bell,
   Eye,
-  Power
+  Power,
+  Share2
 } from 'lucide-react';
 import { APARTMENT_COMPLEXES } from '../data/mockData';
 import { HERO_SLIDES } from './BomnalCoverStory';
@@ -37,7 +38,9 @@ import {
   PopupTemplateType,
   DEFAULT_POPUP_CONFIG,
   savePopupConfigToCloud,
-  loadPopupConfigFromCloud
+  loadPopupConfigFromCloud,
+  saveOgShareImageToCloud,
+  loadOgShareImageFromCloud
 } from '../services/firebaseMedia';
 
 export function getDefaultComment(complex: ApartmentComplex): { comment1: string; comment2: string } {
@@ -120,7 +123,48 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
   initialTab,
   initialCommentComplexId,
 }) => {
-  const [activeTab, setActiveTab] = useState<'complexes' | 'hero' | 'comments' | 'popup'>(initialTab || 'complexes');
+  const [activeTab, setActiveTab] = useState<'complexes' | 'hero' | 'comments' | 'popup' | 'share'>(initialTab || 'complexes');
+
+  // OG Share Image State
+  const [ogDraft, setOgDraft] = useState<string>('/og-image.jpg');
+  const [isUploadingOg, setIsUploadingOg] = useState(false);
+  const [isSavingOg, setIsSavingOg] = useState(false);
+  const [ogSaveMsg, setOgSaveMsg] = useState<string | null>(null);
+  const shareFileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    loadOgShareImageFromCloud().then(img => {
+      if (img) setOgDraft(img);
+    });
+  }, []);
+
+  const handleUploadOgFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingOg(true);
+    try {
+      const dataUrl = await optimizeImageFile(file, 1200, 0.88);
+      setOgDraft(dataUrl);
+    } catch (err: any) {
+      alert('이미지 최적화 실패: ' + (err.message || '파일을 확인해주세요.'));
+    } finally {
+      setIsUploadingOg(false);
+    }
+  };
+
+  const handleSaveOgShare = async () => {
+    if (!ogDraft) return;
+    setIsSavingOg(true);
+    try {
+      await saveOgShareImageToCloud(ogDraft);
+      setOgSaveMsg('카카오톡/SNS 공유 썸네일이 성공적으로 저장되었습니다!');
+      setTimeout(() => setOgSaveMsg(null), 4000);
+    } catch (err: any) {
+      alert('저장 실패: ' + (err.message || '다시 시도해주세요.'));
+    } finally {
+      setIsSavingOg(false);
+    }
+  };
 
   // Popup Notice State
   const [popupDraft, setPopupDraft] = useState<PopupNoticeConfig>(popupConfig || DEFAULT_POPUP_CONFIG);
@@ -714,6 +758,19 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
                 ) : (
                   <span className="w-1.5 h-1.5 rounded-full bg-neutral-400" title="팝업 꺼짐" />
                 )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveTab('share')}
+                className={`pb-3 pt-2 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'share'
+                    ? 'border-[#7A0016] text-[#7A0016]'
+                    : 'border-transparent text-[#666666] hover:text-[#141414]'
+                }`}
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>카톡/SNS 공유 썸네일 설정</span>
               </button>
             </div>
 
@@ -1849,6 +1906,169 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
                           </>
                         )}
                       </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 5: KakaoTalk / SNS Share Thumbnail Manager */}
+              {activeTab === 'share' && (
+                <div className="space-y-5">
+                  {/* Top Notice Banner */}
+                  <div className="bg-[#FAF8F5] border border-[#E5DDD2] rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-serif-luxury text-[11px] font-bold tracking-widest text-[#7A0016] uppercase">
+                          KAKAO / SNS SHARE THUMBNAIL
+                        </span>
+                        <span className="text-[10px] font-bold bg-[#FEE500] text-[#191919] px-2 py-0.5 rounded-full">
+                          카카오톡 · 네이버 · 문자 공유
+                        </span>
+                      </div>
+                      <h4 className="font-korean-serif text-base font-bold text-[#141414] mt-1">
+                        카카오톡 &amp; SNS 링크 공유 썸네일(대표 이미지) 설정
+                      </h4>
+                      <p className="text-xs text-[#666666] mt-0.5">
+                        카카오톡 대화방이나 문자메시지에 홈페이지 주소(<code>www.thebomnal.com</code>)를 보낼 때 링크 아래에 나타나는 미리보기 카드 이미지를 등록합니다.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    {/* Left: Upload and Controls (7 cols) */}
+                    <div className="lg:col-span-7 bg-white border border-[#EAE4DC] rounded-2xl p-5 sm:p-6 space-y-4">
+                      <div className="border-b border-[#F0EBE1] pb-3">
+                        <h5 className="font-bold text-sm text-[#141414]">새로운 공유 대표 이미지 등록</h5>
+                        <p className="text-xs text-[#888888] mt-0.5">
+                          권장 규격: <strong>1200 × 630 픽셀</strong> (가로 비율 1.91:1) / JPG, PNG 파일
+                        </p>
+                      </div>
+
+                      {/* File selector input */}
+                      <input
+                        type="file"
+                        ref={shareFileInputRef}
+                        accept="image/*"
+                        onChange={handleUploadOgFile}
+                        className="hidden"
+                      />
+
+                      <div className="p-4 bg-[#FAF8F5] border border-[#E5DDD2] rounded-xl flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-10 h-10 rounded-xl bg-white border border-[#DDD5C7] flex items-center justify-center text-[#7A0016] shrink-0">
+                            <ImageIcon className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-[#141414] truncate">
+                              준비해두신 카톡 썸네일 이미지를 선택하세요
+                            </p>
+                            <p className="text-[11px] text-[#777777]">
+                              (예: '신뢰를 담은 봄날부동산 상담실.png' 선택)
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => shareFileInputRef.current?.click()}
+                          disabled={isUploadingOg}
+                          className="py-2 px-3.5 bg-[#7A0016] hover:bg-[#580010] text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center gap-1.5 shrink-0 cursor-pointer"
+                        >
+                          <UploadCloud className="w-4 h-4" />
+                          <span>{isUploadingOg ? '처리 중...' : '사진 파일 선택'}</span>
+                        </button>
+                      </div>
+
+                      {/* Info & Kakao Cache guide */}
+                      <div className="p-3.5 bg-[#FFFDE6] border border-[#F2E599] rounded-xl text-xs text-[#665200] space-y-1.5">
+                        <p className="font-bold flex items-center gap-1.5">
+                          <span>💡</span>
+                          <span>카카오톡 캐시(임시 저장) 갱신 안내</span>
+                        </p>
+                        <p className="text-[11px] leading-relaxed text-[#776000]">
+                          저장 후 카카오톡 대화방에 링크를 올렸을 때 이전 사진이 계속 나온다면, 카카오톡 서버의 임시 캐시 때문입니다. 아래 링크를 눌러 카카오톡 캐시를 10초 만에 초기화하시면 새 이미지가 즉시 뜹니다.
+                        </p>
+                        <a
+                          href="https://developers.kakao.com/tool/clear/og"
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 font-bold text-[#3B2D00] hover:underline text-[11px] mt-1 bg-[#FEE500] px-2.5 py-1 rounded-md"
+                        >
+                          <span>카카오 개발자 OG 캐시 삭제 도구 바로가기 ↗</span>
+                        </a>
+                      </div>
+
+                      {/* Save Button */}
+                      <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#F0EBE1]">
+                        {ogSaveMsg ? (
+                          <p className="text-xs text-emerald-700 font-bold flex items-center gap-1.5 animate-in fade-in">
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                            <span>{ogSaveMsg}</span>
+                          </p>
+                        ) : (
+                          <p className="text-xs text-[#888888]">
+                            저장 시 서버의 <code>og-image.jpg</code> 및 <code>card1.jpg</code>에 영구 반영됩니다.
+                          </p>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={handleSaveOgShare}
+                          disabled={isSavingOg}
+                          className="w-full sm:w-auto py-2.5 px-6 bg-[#03C75A] hover:bg-[#02B150] text-white text-xs font-bold rounded-xl transition-all shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                        >
+                          {isSavingOg ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <span>서버 저장 중...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Check className="w-4 h-4" />
+                              <span>카카오톡 공유 썸네일로 영구 저장</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Right: KakaoTalk Chat Preview Mockup (5 cols) */}
+                    <div className="lg:col-span-5 bg-[#B2C7D9] rounded-2xl p-4 sm:p-5 shadow-inner flex flex-col items-center justify-center">
+                      <div className="w-full max-w-[320px] space-y-2">
+                        <span className="text-[11px] font-bold text-[#3E5060] flex items-center gap-1 mb-1">
+                          <span>💬</span>
+                          <span>카카오톡 실제 대화방 미리보기</span>
+                        </span>
+
+                        {/* Kakao Talk Link Card Bubble */}
+                        <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-black/10">
+                          {/* Image preview */}
+                          <div className="w-full aspect-[1.91/1] bg-neutral-200 overflow-hidden relative">
+                            <img
+                              src={ogDraft}
+                              alt="카카오톡 공유 미리보기"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+
+                          {/* Card Text Content */}
+                          <div className="p-3 bg-white text-left space-y-1">
+                            <h6 className="font-bold text-xs text-[#111111] line-clamp-1">
+                              봄날공인중개사사무소 | 대구 신월성 아파트 전문 부동산
+                            </h6>
+                            <p className="text-[11px] text-[#666666] line-clamp-2 leading-tight">
+                              대구 달서구 월성동 e편한세상월배 단지내상가 B103호 봄날공인중개사사무소. 장순조 대표의 11년 무사고 안심 책임중개 및 신월성 아파트 단지 정보 안내.
+                            </p>
+                            <span className="text-[10px] text-[#888888] block pt-1">
+                              www.thebomnal.com
+                            </span>
+                          </div>
+                        </div>
+
+                        <p className="text-center text-[10px] text-[#55697A] font-medium pt-1">
+                          위와 같이 카카오톡 말풍선 형태로 전송됩니다.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
