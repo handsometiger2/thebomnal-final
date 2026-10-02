@@ -125,6 +125,22 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
   const [popupDraft, setPopupDraft] = useState<PopupNoticeConfig>(popupConfig || DEFAULT_POPUP_CONFIG);
   const [isSavingPopup, setIsSavingPopup] = useState(false);
   const [popupSaveMsg, setPopupSaveMsg] = useState<string | null>(null);
+  const bannerFileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+
+  const handleBannerImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploadingBanner(true);
+    try {
+      const dataUrl = await optimizeImageFile(file);
+      setPopupDraft(prev => ({ ...prev, bannerImageUrl: dataUrl }));
+    } catch (err: any) {
+      alert('이미지 최적화 실패: ' + (err.message || '파일을 확인해주세요.'));
+    } finally {
+      setIsUploadingBanner(false);
+    }
+  };
 
   useEffect(() => {
     if (popupConfig) {
@@ -1187,146 +1203,466 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
                       </div>
                     </div>
 
-                    {/* Inputs Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                      <div>
-                        <label className="block font-bold text-[#333333] mb-1">상단 부제목 (작은 안내 문구)</label>
-                        <input
-                          type="text"
-                          value={popupDraft.subtitle}
-                          onChange={(e) => setPopupDraft(prev => ({ ...prev, subtitle: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
-                          placeholder="더 안전하고, 더 스마트하게 줄이는 비용"
-                        />
-                      </div>
+                    {/* Template Selector Bar */}
+                    <div className="bg-[#FAF8F5] border border-[#E5DDD2] rounded-2xl p-4">
+                      <label className="block font-bold text-xs text-[#141414] mb-2.5">
+                        🎨 팝업 디자인 템플릿 선택 (원하는 템플릿을 클릭하세요)
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <button
+                          type="button"
+                          onClick={() => setPopupDraft(prev => ({ ...prev, templateType: 'electronic_contract' }))}
+                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                            (popupDraft.templateType || 'electronic_contract') === 'electronic_contract'
+                              ? 'border-[#7A0016] bg-[#7A0016]/5 ring-2 ring-[#7A0016]/20'
+                              : 'border-neutral-200 hover:border-neutral-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-base">🖥️</span>
+                            {(popupDraft.templateType || 'electronic_contract') === 'electronic_contract' && (
+                              <CheckCircle2 className="w-4 h-4 text-[#7A0016]" />
+                            )}
+                          </div>
+                          <span className="font-bold text-xs text-[#111111] block">전자계약 혜택</span>
+                          <span className="text-[10px] text-neutral-500 block mt-0.5">금리·등기비 감면 모니터형</span>
+                        </button>
 
-                      <div>
-                        <label className="block font-bold text-[#333333] mb-1">메인 큰 제목</label>
-                        <input
-                          type="text"
-                          value={popupDraft.title}
-                          onChange={(e) => setPopupDraft(prev => ({ ...prev, title: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
-                          placeholder="부동산 전자계약"
-                        />
-                      </div>
+                        <button
+                          type="button"
+                          onClick={() => setPopupDraft(prev => ({ ...prev, templateType: 'urgent_listing' }))}
+                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                            popupDraft.templateType === 'urgent_listing'
+                              ? 'border-[#7A0016] bg-[#7A0016]/5 ring-2 ring-[#7A0016]/20'
+                              : 'border-neutral-200 hover:border-neutral-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-base">🏢</span>
+                            {popupDraft.templateType === 'urgent_listing' && (
+                              <CheckCircle2 className="w-4 h-4 text-[#7A0016]" />
+                            )}
+                          </div>
+                          <span className="font-bold text-xs text-[#111111] block">추천·급매 매물</span>
+                          <span className="text-[10px] text-neutral-500 block mt-0.5">단지·평형·가격 브리핑형</span>
+                        </button>
 
-                      <div>
-                        <label className="block font-bold text-[#333333] mb-1">화면 상단 시스템 뱃지</label>
-                        <input
-                          type="text"
-                          value={popupDraft.badgeText}
-                          onChange={(e) => setPopupDraft(prev => ({ ...prev, badgeText: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
-                          placeholder="국토교통부 전자계약시스템 연계"
-                        />
-                      </div>
+                        <button
+                          type="button"
+                          onClick={() => setPopupDraft(prev => ({ ...prev, templateType: 'agency_notice' }))}
+                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                            popupDraft.templateType === 'agency_notice'
+                              ? 'border-[#7A0016] bg-[#7A0016]/5 ring-2 ring-[#7A0016]/20'
+                              : 'border-neutral-200 hover:border-neutral-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-base">🌸</span>
+                            {popupDraft.templateType === 'agency_notice' && (
+                              <CheckCircle2 className="w-4 h-4 text-[#7A0016]" />
+                            )}
+                          </div>
+                          <span className="font-bold text-xs text-[#111111] block">공식 공지·예약제</span>
+                          <span className="text-[10px] text-neutral-500 block mt-0.5">일정·사전예약제 안내문</span>
+                        </button>
 
-                      <div>
-                        <label className="block font-bold text-[#333333] mb-1">핵심 혜택 서브 태그</label>
-                        <input
-                          type="text"
-                          value={popupDraft.heroTag}
-                          onChange={(e) => setPopupDraft(prev => ({ ...prev, heroTag: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
-                          placeholder="고객 맞춤 3대 금융·세무 혜택"
-                        />
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="block font-bold text-[#333333] mb-1">혜택 메인 헤드라인</label>
-                        <input
-                          type="text"
-                          value={popupDraft.heroTitle}
-                          onChange={(e) => setPopupDraft(prev => ({ ...prev, heroTitle: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
-                          placeholder="전자계약 진행 시 금리 인하 & 등기 비용 감면"
-                        />
-                      </div>
-
-                      {/* 3 Metric Boxes */}
-                      <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2">
-                        <span className="font-bold text-[#7A0016] block">1번 지표 박스</span>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            type="text"
-                            value={popupDraft.metric1Label}
-                            onChange={(e) => setPopupDraft(prev => ({ ...prev, metric1Label: e.target.value }))}
-                            className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs"
-                            placeholder="라벨 (예: 대출 우대금리)"
-                          />
-                          <input
-                            type="text"
-                            value={popupDraft.metric1Value}
-                            onChange={(e) => setPopupDraft(prev => ({ ...prev, metric1Value: e.target.value }))}
-                            className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs font-bold text-amber-600"
-                            placeholder="값 (예: 0.1~0.2%p↓)"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2">
-                        <span className="font-bold text-[#7A0016] block">2번 지표 박스</span>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            type="text"
-                            value={popupDraft.metric2Label}
-                            onChange={(e) => setPopupDraft(prev => ({ ...prev, metric2Label: e.target.value }))}
-                            className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs"
-                            placeholder="라벨 (예: 등기 대행료)"
-                          />
-                          <input
-                            type="text"
-                            value={popupDraft.metric2Value}
-                            onChange={(e) => setPopupDraft(prev => ({ ...prev, metric2Value: e.target.value }))}
-                            className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs font-bold text-cyan-600"
-                            placeholder="값 (예: 30% 감면)"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2">
-                        <span className="font-bold text-[#7A0016] block">3번 지표 박스</span>
-                        <div className="grid grid-cols-2 gap-2">
-                          <input
-                            type="text"
-                            value={popupDraft.metric3Label}
-                            onChange={(e) => setPopupDraft(prev => ({ ...prev, metric3Label: e.target.value }))}
-                            className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs"
-                            placeholder="라벨 (예: 확정일자 부여)"
-                          />
-                          <input
-                            type="text"
-                            value={popupDraft.metric3Value}
-                            onChange={(e) => setPopupDraft(prev => ({ ...prev, metric3Value: e.target.value }))}
-                            className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs font-bold text-emerald-600"
-                            placeholder="값 (예: 무료 자동)"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2">
-                        <span className="font-bold text-[#7A0016] block">하단 우측 강조 문구</span>
-                        <input
-                          type="text"
-                          value={popupDraft.bottomNote}
-                          onChange={(e) => setPopupDraft(prev => ({ ...prev, bottomNote: e.target.value }))}
-                          className="w-full px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs font-bold"
-                          placeholder="비대면 전자서명 가능"
-                        />
-                      </div>
-
-                      <div className="md:col-span-2">
-                        <label className="block font-bold text-[#333333] mb-1">하단 바로가기 버튼 텍스트</label>
-                        <input
-                          type="text"
-                          value={popupDraft.buttonText}
-                          onChange={(e) => setPopupDraft(prev => ({ ...prev, buttonText: e.target.value }))}
-                          className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
-                          placeholder="전자계약 혜택 및 안심 상담 바로가기"
-                        />
+                        <button
+                          type="button"
+                          onClick={() => setPopupDraft(prev => ({ ...prev, templateType: 'image_banner' }))}
+                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
+                            popupDraft.templateType === 'image_banner'
+                              ? 'border-[#7A0016] bg-[#7A0016]/5 ring-2 ring-[#7A0016]/20'
+                              : 'border-neutral-200 hover:border-neutral-300 bg-white'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-base">🖼️</span>
+                            {popupDraft.templateType === 'image_banner' && (
+                              <CheckCircle2 className="w-4 h-4 text-[#7A0016]" />
+                            )}
+                          </div>
+                          <span className="font-bold text-xs text-[#111111] block">포스터 이미지형</span>
+                          <span className="text-[10px] text-neutral-500 block mt-0.5">홍보 이미지 직접 업로드</span>
+                        </button>
                       </div>
                     </div>
+
+                    {/* Dynamic Inputs Based on Selected Template */}
+                    {/* TEMPLATE 1: Electronic Contract */}
+                    {(popupDraft.templateType || 'electronic_contract') === 'electronic_contract' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">상단 부제목 (작은 안내 문구)</label>
+                          <input
+                            type="text"
+                            value={popupDraft.subtitle}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, subtitle: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="더 안전하고, 더 스마트하게 줄이는 비용"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">메인 큰 제목</label>
+                          <input
+                            type="text"
+                            value={popupDraft.title}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, title: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="부동산 전자계약"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">화면 상단 시스템 뱃지</label>
+                          <input
+                            type="text"
+                            value={popupDraft.badgeText}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, badgeText: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="국토교통부 전자계약시스템 연계"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">핵심 혜택 서브 태그</label>
+                          <input
+                            type="text"
+                            value={popupDraft.heroTag}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, heroTag: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="고객 맞춤 3대 금융·세무 혜택"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block font-bold text-[#333333] mb-1">혜택 메인 헤드라인</label>
+                          <input
+                            type="text"
+                            value={popupDraft.heroTitle}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, heroTitle: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="전자계약 진행 시 금리 인하 & 등기 비용 감면"
+                          />
+                        </div>
+
+                        {/* 3 Metric Boxes */}
+                        <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2">
+                          <span className="font-bold text-[#7A0016] block">1번 지표 박스</span>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={popupDraft.metric1Label}
+                              onChange={(e) => setPopupDraft(prev => ({ ...prev, metric1Label: e.target.value }))}
+                              className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs"
+                              placeholder="라벨 (예: 대출 우대금리)"
+                            />
+                            <input
+                              type="text"
+                              value={popupDraft.metric1Value}
+                              onChange={(e) => setPopupDraft(prev => ({ ...prev, metric1Value: e.target.value }))}
+                              className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs font-bold text-amber-600"
+                              placeholder="값 (예: 0.1~0.2%p↓)"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2">
+                          <span className="font-bold text-[#7A0016] block">2번 지표 박스</span>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={popupDraft.metric2Label}
+                              onChange={(e) => setPopupDraft(prev => ({ ...prev, metric2Label: e.target.value }))}
+                              className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs"
+                              placeholder="라벨 (예: 등기 대행료)"
+                            />
+                            <input
+                              type="text"
+                              value={popupDraft.metric2Value}
+                              onChange={(e) => setPopupDraft(prev => ({ ...prev, metric2Value: e.target.value }))}
+                              className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs font-bold text-cyan-600"
+                              placeholder="값 (예: 30% 감면)"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2">
+                          <span className="font-bold text-[#7A0016] block">3번 지표 박스</span>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={popupDraft.metric3Label}
+                              onChange={(e) => setPopupDraft(prev => ({ ...prev, metric3Label: e.target.value }))}
+                              className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs"
+                              placeholder="라벨 (예: 확정일자 부여)"
+                            />
+                            <input
+                              type="text"
+                              value={popupDraft.metric3Value}
+                              onChange={(e) => setPopupDraft(prev => ({ ...prev, metric3Value: e.target.value }))}
+                              className="px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs font-bold text-emerald-600"
+                              placeholder="값 (예: 무료 자동)"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 space-y-2">
+                          <span className="font-bold text-[#7A0016] block">하단 우측 강조 문구</span>
+                          <input
+                            type="text"
+                            value={popupDraft.bottomNote}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, bottomNote: e.target.value }))}
+                            className="w-full px-2 py-1.5 bg-white border border-neutral-300 rounded text-xs font-bold"
+                            placeholder="비대면 전자서명 가능"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block font-bold text-[#333333] mb-1">하단 바로가기 버튼 텍스트</label>
+                          <input
+                            type="text"
+                            value={popupDraft.buttonText}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, buttonText: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="전자계약 혜택 및 안심 상담 바로가기"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TEMPLATE 2: Urgent / Featured Listing */}
+                    {popupDraft.templateType === 'urgent_listing' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">추천 매물 뱃지 태그</label>
+                          <input
+                            type="text"
+                            value={popupDraft.listingTag || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, listingTag: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="예: 신월성 초품아 급매 추천 매물"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">아파트 단지명</label>
+                          <input
+                            type="text"
+                            value={popupDraft.listingComplexName || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, listingComplexName: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="예: e편한세상월배"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">평형 및 층수 스펙</label>
+                          <input
+                            type="text"
+                            value={popupDraft.listingSpec || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, listingSpec: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="예: 114㎡ (34평형) · 105동 고층 로얄동"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">매매가 / 거래 희망가</label>
+                          <input
+                            type="text"
+                            value={popupDraft.listingPrice || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, listingPrice: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none font-bold text-[#7A0016]"
+                            placeholder="예: 매매 5억 8,000만원"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2 space-y-2">
+                          <label className="block font-bold text-[#333333]">핵심 장점 3가지 포인트</label>
+                          <input
+                            type="text"
+                            value={popupDraft.listingPoint1 || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, listingPoint1: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none mb-1.5"
+                            placeholder="포인트 1: 남향 판상형 4Bay 풍부한 일조량과 채광"
+                          />
+                          <input
+                            type="text"
+                            value={popupDraft.listingPoint2 || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, listingPoint2: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none mb-1.5"
+                            placeholder="포인트 2: 주인 직접 거주로 내부 최상급 올확장 리모델링"
+                          />
+                          <input
+                            type="text"
+                            value={popupDraft.listingPoint3 || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, listingPoint3: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="포인트 3: 월암초 도보 2분 안전 통학로 및 즉시 입주 협의"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block font-bold text-[#333333] mb-1">상담 연결 버튼 문구</label>
+                          <input
+                            type="text"
+                            value={popupDraft.listingButtonText || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, listingButtonText: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="예: 해당 추천 매물 상세 상담 바로가기"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TEMPLATE 3: Agency Editorial Notice */}
+                    {popupDraft.templateType === 'agency_notice' && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">공지 상단 뱃지 문구</label>
+                          <input
+                            type="text"
+                            value={popupDraft.noticeBadge || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, noticeBadge: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="예: 봄날공인중개사 공식 안내"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">공지 헤드라인 제목</label>
+                          <input
+                            type="text"
+                            value={popupDraft.noticeTitle || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, noticeTitle: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="예: 신월성 아파트 1:1 심층 브리핑 사전 예약제"
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block font-bold text-[#333333] mb-1">서브 설명 문구</label>
+                          <input
+                            type="text"
+                            value={popupDraft.noticeSubtitle || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, noticeSubtitle: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="예: 더 정확하고 정밀한 빅데이터 시세 분석 및 세무 상담을 위해 운영됩니다."
+                          />
+                        </div>
+
+                        <div className="md:col-span-2">
+                          <label className="block font-bold text-[#333333] mb-1">공지 상세 본문 내용</label>
+                          <textarea
+                            rows={4}
+                            value={popupDraft.noticeBody || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, noticeBody: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none leading-relaxed"
+                            placeholder="공지할 상세 내용을 정갈하게 입력해 주세요."
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">일정 / 영업시간 강조 박스</label>
+                          <input
+                            type="text"
+                            value={popupDraft.noticeHighlight || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, noticeHighlight: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="예: 상담 가능 시간: 월~토 10:30~19:30 (일요일 예약제)"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block font-bold text-[#333333] mb-1">하단 버튼 텍스트</label>
+                          <input
+                            type="text"
+                            value={popupDraft.noticeButtonText || ''}
+                            onChange={(e) => setPopupDraft(prev => ({ ...prev, noticeButtonText: e.target.value }))}
+                            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                            placeholder="예: 대표 공인중개사 1:1 상담 예약하기"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {/* TEMPLATE 4: Image Poster Banner */}
+                    {popupDraft.templateType === 'image_banner' && (
+                      <div className="space-y-4 text-xs">
+                        <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
+                          <label className="block font-bold text-[#333333]">포스터 / 홍보 배너 이미지 업로드</label>
+                          
+                          {popupDraft.bannerImageUrl ? (
+                            <div className="relative rounded-xl overflow-hidden border border-neutral-300 max-h-[220px] max-w-[280px] mx-auto bg-neutral-100 flex items-center justify-center">
+                              <img 
+                                src={popupDraft.bannerImageUrl} 
+                                alt="배너 미리보기" 
+                                className="w-full h-auto object-contain max-h-[220px]" 
+                              />
+                            </div>
+                          ) : (
+                            <div className="py-8 border-2 border-dashed border-neutral-300 rounded-xl text-center text-neutral-400">
+                              <ImageIcon className="w-8 h-8 mx-auto mb-1 opacity-50" />
+                              <p>업로드된 포스터 이미지가 없습니다.</p>
+                            </div>
+                          )}
+
+                          <input
+                            type="file"
+                            ref={bannerFileInputRef}
+                            onChange={handleBannerImageUpload}
+                            accept="image/*"
+                            className="hidden"
+                          />
+
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => bannerFileInputRef.current?.click()}
+                              disabled={isUploadingBanner}
+                              className="py-2 px-4 bg-[#7A0016] hover:bg-[#580010] text-white rounded-lg font-bold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                            >
+                              <UploadCloud className="w-4 h-4" />
+                              <span>{isUploadingBanner ? '이미지 최적화 중...' : '포스터 사진 파일 선택'}</span>
+                            </button>
+                            {popupDraft.bannerImageUrl && (
+                              <button
+                                type="button"
+                                onClick={() => setPopupDraft(prev => ({ ...prev, bannerImageUrl: '' }))}
+                                className="py-2 px-3 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 rounded-lg font-medium cursor-pointer"
+                              >
+                                삭제
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block font-bold text-[#333333] mb-1">버튼 문구</label>
+                            <input
+                              type="text"
+                              value={popupDraft.bannerButtonText || ''}
+                              onChange={(e) => setPopupDraft(prev => ({ ...prev, bannerButtonText: e.target.value }))}
+                              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                              placeholder="예: 자세히 보기 / 상담 바로가기"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-[#333333] mb-1">버튼 클릭 시 이동 링크 / 섹션</label>
+                            <input
+                              type="text"
+                              value={popupDraft.bannerButtonLink || ''}
+                              onChange={(e) => setPopupDraft(prev => ({ ...prev, bannerButtonLink: e.target.value }))}
+                              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
+                              placeholder="예: #contact 또는 외부 블로그 URL"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     {/* Save Action */}
                     <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-[#F0EBE1]">

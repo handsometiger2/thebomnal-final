@@ -245,8 +245,13 @@ export async function changeAdminPinCloud(newPin: string): Promise<void> {
 // ----------------------------------------------------
 // Popup Notice Configuration (Firestore + localStorage)
 // ----------------------------------------------------
+export type PopupTemplateType = 'electronic_contract' | 'urgent_listing' | 'agency_notice' | 'image_banner';
+
 export interface PopupNoticeConfig {
   isEnabled: boolean;
+  templateType: PopupTemplateType;
+
+  // Template 1: Electronic Contract (Default)
   subtitle: string;
   title: string;
   badgeText: string;
@@ -260,11 +265,38 @@ export interface PopupNoticeConfig {
   metric3Value: string;
   bottomNote: string;
   buttonText: string;
+
+  // Template 2: Urgent / Featured Listing
+  listingComplexName: string;
+  listingSpec: string;
+  listingPrice: string;
+  listingTag: string;
+  listingPoint1: string;
+  listingPoint2: string;
+  listingPoint3: string;
+  listingButtonText: string;
+
+  // Template 3: Agency Editorial Notice
+  noticeBadge: string;
+  noticeTitle: string;
+  noticeSubtitle: string;
+  noticeBody: string;
+  noticeHighlight: string;
+  noticePhone: string;
+  noticeButtonText: string;
+
+  // Template 4: Image Poster Banner
+  bannerImageUrl: string;
+  bannerTitle: string;
+  bannerButtonText: string;
+  bannerButtonLink: string;
+
   updatedAt?: string;
 }
 
 export const DEFAULT_POPUP_CONFIG: PopupNoticeConfig = {
   isEnabled: true,
+  templateType: 'electronic_contract',
   subtitle: '더 안전하고, 더 스마트하게 줄이는 비용',
   title: '부동산 전자계약',
   badgeText: '국토교통부 전자계약시스템 연계',
@@ -278,6 +310,31 @@ export const DEFAULT_POPUP_CONFIG: PopupNoticeConfig = {
   metric3Value: '무료 자동',
   bottomNote: '비대면 전자서명 가능',
   buttonText: '전자계약 혜택 및 안심 상담 바로가기',
+
+  // Template 2 defaults
+  listingComplexName: 'e편한세상월배',
+  listingSpec: '114㎡ (34평형) · 105동 고층 로얄동',
+  listingPrice: '매매 5억 8,000만원',
+  listingTag: '신월성 초품아 급매 추천 매물',
+  listingPoint1: '남향 판상형 4Bay 풍부한 일조량과 채광',
+  listingPoint2: '주인 직접 거주로 내부 최상급 올확장 리모델링',
+  listingPoint3: '월암초 도보 2분 안전 통학로 및 즉시 입주 협의',
+  listingButtonText: '해당 추천 매물 상세 상담 바로가기',
+
+  // Template 3 defaults
+  noticeBadge: '봄날공인중개사 공식 안내',
+  noticeTitle: '신월성 아파트 1:1 심층 브리핑 사전 예약제',
+  noticeSubtitle: '더 정확하고 정밀한 빅데이터 시세 분석 및 세무 상담을 위해 운영됩니다.',
+  noticeBody: '봄날공인중개사사무소는 고객 한 분 한 분께 신뢰할 수 있는 최적의 주거 매물을 제안해 드리고자 1:1 맞춤 사전 예약제를 실시합니다. 방문 전 미리 연락해 주시면 원하시는 단지 및 평형별 최신 실거래 비교 자료를 미리 준비해 드립니다.',
+  noticeHighlight: '상담 가능 시간: 월~토 10:30~19:30 (일요일 및 야간 사전 예약 가능)',
+  noticePhone: '053-642-0008',
+  noticeButtonText: '대표 공인중개사 1:1 상담 예약하기',
+
+  // Template 4 defaults
+  bannerImageUrl: '',
+  bannerTitle: '봄날공인중개사사무소 안내',
+  bannerButtonText: '자세히 보기',
+  bannerButtonLink: '#contact',
 };
 
 const POPUP_CONFIG_STORAGE_KEY = 'bomnal_popup_custom_config';
