@@ -250,6 +250,7 @@ export type PopupTemplateType = 'electronic_contract' | 'urgent_listing' | 'agen
 export interface PopupNoticeConfig {
   isEnabled: boolean;
   templateType: PopupTemplateType;
+  activeTemplates?: PopupTemplateType[]; // Multi-slide carousel active templates (e.g. ['urgent_listing', 'agency_notice'])
 
   // Template 1: Electronic Contract (Default)
   subtitle: string;

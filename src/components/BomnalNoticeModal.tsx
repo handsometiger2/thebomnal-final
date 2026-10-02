@@ -1,6 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { X, ArrowRight, Building2, Phone, Sparkles, CheckCircle2, Calendar, FileText, Image as ImageIcon } from 'lucide-react';
-import { PopupNoticeConfig, DEFAULT_POPUP_CONFIG, loadPopupConfigFromCloud } from '../services/firebaseMedia';
+import { 
+  X, 
+  ArrowRight, 
+  Building2, 
+  Phone, 
+  Sparkles, 
+  CheckCircle2, 
+  Calendar, 
+  FileText, 
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
+import { PopupNoticeConfig, DEFAULT_POPUP_CONFIG, loadPopupConfigFromCloud, PopupTemplateType } from '../services/firebaseMedia';
 
 const POPUP_STORAGE_KEY = 'bomnal_electronic_contract_popup_hide_until';
 
@@ -17,6 +29,7 @@ export const BomnalNoticeModal: React.FC<BomnalNoticeModalProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(forceOpen);
   const [config, setConfig] = useState<PopupNoticeConfig>(customConfig || DEFAULT_POPUP_CONFIG);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   useEffect(() => {
     if (customConfig) {
@@ -27,6 +40,27 @@ export const BomnalNoticeModal: React.FC<BomnalNoticeModalProps> = ({
       });
     }
   }, [customConfig]);
+
+  // Active templates list
+  const templates: PopupTemplateType[] = (config.activeTemplates && config.activeTemplates.length > 0)
+    ? config.activeTemplates
+    : [config.templateType || 'electronic_contract'];
+
+  // Keep index within bounds
+  useEffect(() => {
+    if (currentSlideIndex >= templates.length) {
+      setCurrentSlideIndex(0);
+    }
+  }, [templates.length, currentSlideIndex]);
+
+  // Auto rotate slides every 7 seconds if multiple slides exist
+  useEffect(() => {
+    if (!isOpen || templates.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % templates.length);
+    }, 7000);
+    return () => clearInterval(timer);
+  }, [isOpen, templates.length]);
 
   useEffect(() => {
     if (forceOpen) {
@@ -63,6 +97,14 @@ export const BomnalNoticeModal: React.FC<BomnalNoticeModalProps> = ({
     if (onClosePreview) onClosePreview();
   };
 
+  const handleNextSlide = () => {
+    setCurrentSlideIndex((prev) => (prev + 1) % templates.length);
+  };
+
+  const handlePrevSlide = () => {
+    setCurrentSlideIndex((prev) => (prev - 1 + templates.length) % templates.length);
+  };
+
   const handleDismissForever = () => {
     try {
       // Hide for 7 days
@@ -85,7 +127,7 @@ export const BomnalNoticeModal: React.FC<BomnalNoticeModalProps> = ({
 
   if (!isOpen) return null;
 
-  const template = config.templateType || 'electronic_contract';
+  const currentTemplate = templates[currentSlideIndex] || 'electronic_contract';
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/65 backdrop-blur-xs animate-fadeIn select-none">
@@ -104,10 +146,55 @@ export const BomnalNoticeModal: React.FC<BomnalNoticeModalProps> = ({
           <X className="w-6 h-6 stroke-[1.75]" />
         </button>
 
+        {/* Carousel Slide Indicators & Arrows (If 2 or more active slides) */}
+        {templates.length > 1 && (
+          <div className="w-full flex items-center justify-between mb-3 px-1 border-b border-neutral-100 pb-2.5">
+            {/* Dots */}
+            <div className="flex items-center gap-1.5">
+              {templates.map((tpl, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setCurrentSlideIndex(i)}
+                  className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                    i === currentSlideIndex 
+                      ? 'w-6 bg-[#7A0016]' 
+                      : 'w-2 bg-neutral-300 hover:bg-neutral-400'
+                  }`}
+                  aria-label={`${i + 1}번째 슬라이드로 이동`}
+                />
+              ))}
+            </div>
+
+            {/* Slide Index & Navigation Arrows */}
+            <div className="flex items-center gap-1 text-xs text-neutral-500 font-medium">
+              <span className="font-mono text-[11px] font-bold text-[#7A0016] mr-1">
+                {currentSlideIndex + 1} <span className="text-neutral-300 font-normal">/</span> {templates.length}
+              </span>
+              <button
+                type="button"
+                onClick={handlePrevSlide}
+                className="p-1 hover:bg-neutral-100 rounded-md transition-colors text-neutral-600 hover:text-neutral-900 cursor-pointer active:scale-95"
+                aria-label="이전 공지"
+              >
+                <ChevronLeft className="w-4 h-4 stroke-[2.25]" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNextSlide}
+                className="p-1 hover:bg-neutral-100 rounded-md transition-colors text-neutral-600 hover:text-neutral-900 cursor-pointer active:scale-95"
+                aria-label="다음 공지"
+              >
+                <ChevronRight className="w-4 h-4 stroke-[2.25]" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ---------------------------------------------------- */}
-        {/* TEMPLATE 1: Electronic Contract (Default) */}
+        {/* TEMPLATE 1: Electronic Contract */}
         {/* ---------------------------------------------------- */}
-        {template === 'electronic_contract' && (
+        {currentTemplate === 'electronic_contract' && (
           <>
             {/* Top Subtitle Copy */}
             <p className="text-[13px] sm:text-sm text-[#444444] font-medium tracking-tight mb-1.5 font-sans-clean break-keep">
@@ -204,7 +291,7 @@ export const BomnalNoticeModal: React.FC<BomnalNoticeModalProps> = ({
         {/* ---------------------------------------------------- */}
         {/* TEMPLATE 2: Urgent / Featured Listing */}
         {/* ---------------------------------------------------- */}
-        {template === 'urgent_listing' && (
+        {currentTemplate === 'urgent_listing' && (
           <div className="w-full text-left">
             {/* Top Badge */}
             <div className="flex items-center gap-1.5 mb-2">
@@ -265,7 +352,7 @@ export const BomnalNoticeModal: React.FC<BomnalNoticeModalProps> = ({
         {/* ---------------------------------------------------- */}
         {/* TEMPLATE 3: Agency Editorial Notice */}
         {/* ---------------------------------------------------- */}
-        {template === 'agency_notice' && (
+        {currentTemplate === 'agency_notice' && (
           <div className="w-full text-center">
             {/* Elegant Header Icon */}
             <div className="w-12 h-12 rounded-2xl bg-[#7A0016]/10 text-[#7A0016] flex items-center justify-center mx-auto mb-3">
@@ -311,7 +398,7 @@ export const BomnalNoticeModal: React.FC<BomnalNoticeModalProps> = ({
         {/* ---------------------------------------------------- */}
         {/* TEMPLATE 4: Image Poster Banner */}
         {/* ---------------------------------------------------- */}
-        {template === 'image_banner' && (
+        {currentTemplate === 'image_banner' && (
           <div className="w-full">
             {config.bannerImageUrl ? (
               <div className="rounded-2xl overflow-hidden shadow-md border border-neutral-200 mb-4 max-h-[380px] bg-neutral-100 flex items-center justify-center">

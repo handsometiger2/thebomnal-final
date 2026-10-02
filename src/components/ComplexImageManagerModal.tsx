@@ -34,6 +34,7 @@ import {
   verifyAdminPinCloud,
   changeAdminPinCloud,
   PopupNoticeConfig,
+  PopupTemplateType,
   DEFAULT_POPUP_CONFIG,
   savePopupConfigToCloud,
   loadPopupConfigFromCloud
@@ -125,8 +126,33 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
   const [popupDraft, setPopupDraft] = useState<PopupNoticeConfig>(popupConfig || DEFAULT_POPUP_CONFIG);
   const [isSavingPopup, setIsSavingPopup] = useState(false);
   const [popupSaveMsg, setPopupSaveMsg] = useState<string | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<PopupTemplateType>('urgent_listing');
   const bannerFileInputRef = useRef<HTMLInputElement>(null);
   const [isUploadingBanner, setIsUploadingBanner] = useState(false);
+
+  const toggleTemplateActive = (t: PopupTemplateType, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    const currentList = popupDraft.activeTemplates && popupDraft.activeTemplates.length > 0
+      ? [...popupDraft.activeTemplates]
+      : [popupDraft.templateType || 'agency_notice'];
+
+    let nextList: PopupTemplateType[];
+    if (currentList.includes(t)) {
+      if (currentList.length === 1) {
+        alert('최소 1개의 슬라이드는 선택되어 있어야 합니다.');
+        return;
+      }
+      nextList = currentList.filter(item => item !== t);
+    } else {
+      nextList = [...currentList, t];
+    }
+
+    setPopupDraft(prev => ({
+      ...prev,
+      activeTemplates: nextList,
+      templateType: nextList[0] || t,
+    }));
+  };
 
   const handleBannerImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1203,93 +1229,221 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
                       </div>
                     </div>
 
-                    {/* Template Selector Bar */}
-                    <div className="bg-[#FAF8F5] border border-[#E5DDD2] rounded-2xl p-4">
-                      <label className="block font-bold text-xs text-[#141414] mb-2.5">
-                        🎨 팝업 디자인 템플릿 선택 (원하는 템플릿을 클릭하세요)
-                      </label>
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        <button
-                          type="button"
-                          onClick={() => setPopupDraft(prev => ({ ...prev, templateType: 'electronic_contract' }))}
-                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            (popupDraft.templateType || 'electronic_contract') === 'electronic_contract'
-                              ? 'border-[#7A0016] bg-[#7A0016]/5 ring-2 ring-[#7A0016]/20'
-                              : 'border-neutral-200 hover:border-neutral-300 bg-white'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-base">🖥️</span>
-                            {(popupDraft.templateType || 'electronic_contract') === 'electronic_contract' && (
-                              <CheckCircle2 className="w-4 h-4 text-[#7A0016]" />
-                            )}
-                          </div>
-                          <span className="font-bold text-xs text-[#111111] block">전자계약 혜택</span>
-                          <span className="text-[10px] text-neutral-500 block mt-0.5">우대금리·확정일자 모니터형</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setPopupDraft(prev => ({ ...prev, templateType: 'urgent_listing' }))}
-                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            popupDraft.templateType === 'urgent_listing'
-                              ? 'border-[#7A0016] bg-[#7A0016]/5 ring-2 ring-[#7A0016]/20'
-                              : 'border-neutral-200 hover:border-neutral-300 bg-white'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-base">🏢</span>
-                            {popupDraft.templateType === 'urgent_listing' && (
-                              <CheckCircle2 className="w-4 h-4 text-[#7A0016]" />
-                            )}
-                          </div>
-                          <span className="font-bold text-xs text-[#111111] block">추천·급매 매물</span>
-                          <span className="text-[10px] text-neutral-500 block mt-0.5">단지·평형·가격 브리핑형</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setPopupDraft(prev => ({ ...prev, templateType: 'agency_notice' }))}
-                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            popupDraft.templateType === 'agency_notice'
-                              ? 'border-[#7A0016] bg-[#7A0016]/5 ring-2 ring-[#7A0016]/20'
-                              : 'border-neutral-200 hover:border-neutral-300 bg-white'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-base">🌸</span>
-                            {popupDraft.templateType === 'agency_notice' && (
-                              <CheckCircle2 className="w-4 h-4 text-[#7A0016]" />
-                            )}
-                          </div>
-                          <span className="font-bold text-xs text-[#111111] block">공식 공지·예약제</span>
-                          <span className="text-[10px] text-neutral-500 block mt-0.5">일정·사전예약제 안내문</span>
-                        </button>
-
-                        <button
-                          type="button"
-                          onClick={() => setPopupDraft(prev => ({ ...prev, templateType: 'image_banner' }))}
-                          className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between ${
-                            popupDraft.templateType === 'image_banner'
-                              ? 'border-[#7A0016] bg-[#7A0016]/5 ring-2 ring-[#7A0016]/20'
-                              : 'border-neutral-200 hover:border-neutral-300 bg-white'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-base">🖼️</span>
-                            {popupDraft.templateType === 'image_banner' && (
-                              <CheckCircle2 className="w-4 h-4 text-[#7A0016]" />
-                            )}
-                          </div>
-                          <span className="font-bold text-xs text-[#111111] block">포스터 이미지형</span>
-                          <span className="text-[10px] text-neutral-500 block mt-0.5">홍보 이미지 직접 업로드</span>
-                        </button>
+                    {/* Template Selector Bar (Carousel Multi-Select & Switcher) */}
+                    <div className="bg-[#FAF8F5] border border-[#E5DDD2] rounded-2xl p-4 space-y-3">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                        <div>
+                          <label className="block font-bold text-xs text-[#141414]">
+                            🎠 캐러셀 팝업 슬라이드 구성 (원하는 슬라이드를 켜고 끄세요)
+                          </label>
+                          <p className="text-[11px] text-[#666666]">
+                            여러 개를 켜두시면 방문자에게 팝업 창 안에서 좌우로 넘겨보는 캐러셀 슬라이드로 노출됩니다.
+                          </p>
+                        </div>
+                        <span className="text-[11px] font-bold text-[#7A0016] bg-[#7A0016]/10 px-2.5 py-1 rounded-full shrink-0">
+                          선택된 슬라이드: {(popupDraft.activeTemplates || [popupDraft.templateType || 'agency_notice']).length}개
+                        </span>
                       </div>
+
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        {/* 1. Electronic Contract */}
+                        {(() => {
+                          const activeList = popupDraft.activeTemplates || [popupDraft.templateType || 'agency_notice'];
+                          const isIncluded = activeList.includes('electronic_contract');
+                          const isEditing = editingTemplate === 'electronic_contract';
+                          const slideNum = activeList.indexOf('electronic_contract') + 1;
+
+                          return (
+                            <div
+                              onClick={() => setEditingTemplate('electronic_contract')}
+                              className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
+                                isEditing
+                                  ? 'border-[#7A0016] bg-white ring-2 ring-[#7A0016]/20 shadow-sm'
+                                  : isIncluded
+                                  ? 'border-neutral-300 bg-white hover:border-neutral-400'
+                                  : 'border-neutral-200 bg-neutral-50/60 opacity-60 hover:opacity-90'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-base">🖥️</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => toggleTemplateActive('electronic_contract', e)}
+                                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                                    isIncluded
+                                      ? 'bg-emerald-600 text-white'
+                                      : 'bg-neutral-200 text-neutral-600 hover:bg-neutral-300'
+                                  }`}
+                                >
+                                  {isIncluded ? `${slideNum}번 슬라이드 ✓` : '+ 슬라이드 끔'}
+                                </button>
+                              </div>
+                              <div>
+                                <span className="font-bold text-xs text-[#111111] block">전자계약 혜택</span>
+                                <span className="text-[10px] text-neutral-500 block mt-0.5">우대금리·확정일자 모니터형</span>
+                              </div>
+                              {isEditing && (
+                                <span className="text-[10px] text-[#7A0016] font-bold mt-2 pt-1 border-t border-neutral-100 block">
+                                  ● 현재 편집 중
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                        {/* 2. Urgent / Featured Listing */}
+                        {(() => {
+                          const activeList = popupDraft.activeTemplates || [popupDraft.templateType || 'agency_notice'];
+                          const isIncluded = activeList.includes('urgent_listing');
+                          const isEditing = editingTemplate === 'urgent_listing';
+                          const slideNum = activeList.indexOf('urgent_listing') + 1;
+
+                          return (
+                            <div
+                              onClick={() => setEditingTemplate('urgent_listing')}
+                              className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
+                                isEditing
+                                  ? 'border-[#7A0016] bg-white ring-2 ring-[#7A0016]/20 shadow-sm'
+                                  : isIncluded
+                                  ? 'border-neutral-300 bg-white hover:border-neutral-400'
+                                  : 'border-neutral-200 bg-neutral-50/60 opacity-60 hover:opacity-90'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-base">🏢</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => toggleTemplateActive('urgent_listing', e)}
+                                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                                    isIncluded
+                                      ? 'bg-emerald-600 text-white'
+                                      : 'bg-neutral-200 text-neutral-600 hover:bg-neutral-300'
+                                  }`}
+                                >
+                                  {isIncluded ? `${slideNum}번 슬라이드 ✓` : '+ 슬라이드 끔'}
+                                </button>
+                              </div>
+                              <div>
+                                <span className="font-bold text-xs text-[#111111] block">추천·급매 매물</span>
+                                <span className="text-[10px] text-neutral-500 block mt-0.5">단지·평형·가격 브리핑형</span>
+                              </div>
+                              {isEditing && (
+                                <span className="text-[10px] text-[#7A0016] font-bold mt-2 pt-1 border-t border-neutral-100 block">
+                                  ● 현재 편집 중
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                        {/* 3. Agency Notice */}
+                        {(() => {
+                          const activeList = popupDraft.activeTemplates || [popupDraft.templateType || 'agency_notice'];
+                          const isIncluded = activeList.includes('agency_notice');
+                          const isEditing = editingTemplate === 'agency_notice';
+                          const slideNum = activeList.indexOf('agency_notice') + 1;
+
+                          return (
+                            <div
+                              onClick={() => setEditingTemplate('agency_notice')}
+                              className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
+                                isEditing
+                                  ? 'border-[#7A0016] bg-white ring-2 ring-[#7A0016]/20 shadow-sm'
+                                  : isIncluded
+                                  ? 'border-neutral-300 bg-white hover:border-neutral-400'
+                                  : 'border-neutral-200 bg-neutral-50/60 opacity-60 hover:opacity-90'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-base">🌸</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => toggleTemplateActive('agency_notice', e)}
+                                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                                    isIncluded
+                                      ? 'bg-emerald-600 text-white'
+                                      : 'bg-neutral-200 text-neutral-600 hover:bg-neutral-300'
+                                  }`}
+                                >
+                                  {isIncluded ? `${slideNum}번 슬라이드 ✓` : '+ 슬라이드 끔'}
+                                </button>
+                              </div>
+                              <div>
+                                <span className="font-bold text-xs text-[#111111] block">공식 공지·예약제</span>
+                                <span className="text-[10px] text-neutral-500 block mt-0.5">일정·사전예약제 안내문</span>
+                              </div>
+                              {isEditing && (
+                                <span className="text-[10px] text-[#7A0016] font-bold mt-2 pt-1 border-t border-neutral-100 block">
+                                  ● 현재 편집 중
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
+
+                        {/* 4. Image Banner */}
+                        {(() => {
+                          const activeList = popupDraft.activeTemplates || [popupDraft.templateType || 'agency_notice'];
+                          const isIncluded = activeList.includes('image_banner');
+                          const isEditing = editingTemplate === 'image_banner';
+                          const slideNum = activeList.indexOf('image_banner') + 1;
+
+                          return (
+                            <div
+                              onClick={() => setEditingTemplate('image_banner')}
+                              className={`p-3 rounded-xl border text-left transition-all cursor-pointer flex flex-col justify-between relative ${
+                                isEditing
+                                  ? 'border-[#7A0016] bg-white ring-2 ring-[#7A0016]/20 shadow-sm'
+                                  : isIncluded
+                                  ? 'border-neutral-300 bg-white hover:border-neutral-400'
+                                  : 'border-neutral-200 bg-neutral-50/60 opacity-60 hover:opacity-90'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between mb-1.5">
+                                <span className="text-base">🖼️</span>
+                                <button
+                                  type="button"
+                                  onClick={(e) => toggleTemplateActive('image_banner', e)}
+                                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold cursor-pointer transition-colors ${
+                                    isIncluded
+                                      ? 'bg-emerald-600 text-white'
+                                      : 'bg-neutral-200 text-neutral-600 hover:bg-neutral-300'
+                                  }`}
+                                >
+                                  {isIncluded ? `${slideNum}번 슬라이드 ✓` : '+ 슬라이드 끔'}
+                                </button>
+                              </div>
+                              <div>
+                                <span className="font-bold text-xs text-[#111111] block">포스터 이미지형</span>
+                                <span className="text-[10px] text-neutral-500 block mt-0.5">홍보 이미지 직접 업로드</span>
+                              </div>
+                              {isEditing && (
+                                <span className="text-[10px] text-[#7A0016] font-bold mt-2 pt-1 border-t border-neutral-100 block">
+                                  ● 현재 편집 중
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    </div>
+
+                    {/* Active Editor Title */}
+                    <div className="flex items-center gap-2 pt-2 border-t border-neutral-100">
+                      <span className="text-xs font-bold text-[#7A0016] bg-[#7A0016]/10 px-2 py-0.5 rounded">
+                        현재 편집 중인 슬라이드
+                      </span>
+                      <span className="text-xs font-bold text-[#141414]">
+                        {editingTemplate === 'electronic_contract' && '🖥️ 전자계약 혜택 슬라이드'}
+                        {editingTemplate === 'urgent_listing' && '🏢 추천·급매 매물 브리핑 슬라이드'}
+                        {editingTemplate === 'agency_notice' && '🌸 공식 공지·예약제 슬라이드'}
+                        {editingTemplate === 'image_banner' && '🖼️ 포스터 이미지형 슬라이드'}
+                      </span>
                     </div>
 
                     {/* Dynamic Inputs Based on Selected Template */}
                     {/* TEMPLATE 1: Electronic Contract */}
-                    {(popupDraft.templateType || 'electronic_contract') === 'electronic_contract' && (
+                    {editingTemplate === 'electronic_contract' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <div>
                           <label className="block font-bold text-[#333333] mb-1">상단 부제목 (작은 안내 문구)</label>
@@ -1342,7 +1496,7 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
                             value={popupDraft.heroTitle}
                             onChange={(e) => setPopupDraft(prev => ({ ...prev, heroTitle: e.target.value }))}
                             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:border-[#7A0016] focus:outline-none"
-                            placeholder="전자계약 진행 시 금리 인하 & 등기 비용 감면"
+                            placeholder="전자계약 진행 시 대출 우대금리 & 확정일자 자동 부여"
                           />
                         </div>
 
@@ -1432,7 +1586,7 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
                     )}
 
                     {/* TEMPLATE 2: Urgent / Featured Listing */}
-                    {popupDraft.templateType === 'urgent_listing' && (
+                    {editingTemplate === 'urgent_listing' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <div>
                           <label className="block font-bold text-[#333333] mb-1">추천 매물 뱃지 태그</label>
@@ -1517,7 +1671,7 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
                     )}
 
                     {/* TEMPLATE 3: Agency Editorial Notice */}
-                    {popupDraft.templateType === 'agency_notice' && (
+                    {editingTemplate === 'agency_notice' && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <div>
                           <label className="block font-bold text-[#333333] mb-1">공지 상단 뱃지 문구</label>
@@ -1588,7 +1742,7 @@ export const ComplexImageManagerModal: React.FC<ComplexImageManagerModalProps> =
                     )}
 
                     {/* TEMPLATE 4: Image Poster Banner */}
-                    {popupDraft.templateType === 'image_banner' && (
+                    {editingTemplate === 'image_banner' && (
                       <div className="space-y-4 text-xs">
                         <div className="p-4 bg-neutral-50 border border-neutral-200 rounded-xl space-y-3">
                           <label className="block font-bold text-[#333333]">포스터 / 홍보 배너 이미지 업로드</label>
