@@ -147,29 +147,34 @@ export const BomnalNoticeModal: React.FC<BomnalNoticeModalProps> = ({
                       </h3>
                     </div>
 
-                    {/* 3 Metrics Grid Inside Screen */}
-                    <div className="grid grid-cols-3 gap-2 pt-1">
-                      <div className="bg-neutral-900 text-white rounded-lg p-2.5 text-center flex flex-col justify-between">
-                        <span className="text-[10px] text-neutral-400 block truncate">{config.metric1Label}</span>
-                        <span className="text-xs sm:text-sm font-bold text-[#FFD700] block mt-1">
-                          {config.metric1Value}
-                        </span>
-                      </div>
+                    {/* Dynamic Metrics Grid Inside Screen (Adapts cleanly to 1, 2, or 3 metrics) */}
+                    {(() => {
+                      const metrics = [
+                        { label: config.metric1Label, value: config.metric1Value, color: 'text-[#FFD700]' },
+                        { label: config.metric2Label, value: config.metric2Value, color: 'text-[#00E5FF]' },
+                        { label: config.metric3Label, value: config.metric3Value, color: 'text-[#00E676]' },
+                      ].filter(m => (m.label && m.label.trim()) || (m.value && m.value.trim()));
 
-                      <div className="bg-neutral-900 text-white rounded-lg p-2.5 text-center flex flex-col justify-between">
-                        <span className="text-[10px] text-neutral-400 block truncate">{config.metric2Label}</span>
-                        <span className="text-xs sm:text-sm font-bold text-[#00E5FF] block mt-1">
-                          {config.metric2Value}
-                        </span>
-                      </div>
+                      if (metrics.length === 0) return null;
 
-                      <div className="bg-neutral-900 text-white rounded-lg p-2.5 text-center flex flex-col justify-between">
-                        <span className="text-[10px] text-neutral-400 block truncate">{config.metric3Label}</span>
-                        <span className="text-xs sm:text-sm font-bold text-[#00E676] block mt-1">
-                          {config.metric3Value}
-                        </span>
-                      </div>
-                    </div>
+                      const gridColsClass = 
+                        metrics.length === 1 ? 'grid-cols-1' :
+                        metrics.length === 2 ? 'grid-cols-2' :
+                        'grid-cols-3';
+
+                      return (
+                        <div className={`grid ${gridColsClass} gap-2 pt-1`}>
+                          {metrics.map((m, idx) => (
+                            <div key={idx} className="bg-neutral-900 text-white rounded-lg p-2.5 text-center flex flex-col justify-between">
+                              <span className="text-[10px] text-neutral-400 block truncate">{m.label}</span>
+                              <span className={`text-xs sm:text-sm font-bold block mt-1 ${m.color}`}>
+                                {m.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
 
                     <div className="text-[10px] text-neutral-500 flex items-center justify-between pt-1 border-t border-neutral-100">
                       <span>봄날공인중개사사무소 안심 인증 매물</span>

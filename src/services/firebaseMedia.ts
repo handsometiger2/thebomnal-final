@@ -295,21 +295,21 @@ export interface PopupNoticeConfig {
 }
 
 export const DEFAULT_POPUP_CONFIG: PopupNoticeConfig = {
-  isEnabled: true,
+  isEnabled: false, // 기본값: 팝업 노출 끄기 (필요할 때만 켜기)
   templateType: 'electronic_contract',
-  subtitle: '더 안전하고, 더 스마트하게 줄이는 비용',
+  subtitle: '더 안전하고 스마트한 비대면 안심 계약',
   title: '부동산 전자계약',
   badgeText: '국토교통부 전자계약시스템 연계',
-  heroTag: '고객 맞춤 3대 금융·세무 혜택',
-  heroTitle: '전자계약 진행 시 금리 인하 & 등기 비용 감면',
+  heroTag: '비대면 안심 계약 혜택',
+  heroTitle: '전자계약 진행 시 대출 우대금리 & 확정일자 자동 부여',
   metric1Label: '대출 우대금리',
   metric1Value: '0.1~0.2%p↓',
-  metric2Label: '등기 대행료',
-  metric2Value: '30% 감면',
-  metric3Label: '확정일자 부여',
-  metric3Value: '무료 자동',
+  metric2Label: '확정일자 부여',
+  metric2Value: '무료 자동',
+  metric3Label: '',
+  metric3Value: '',
   bottomNote: '비대면 전자서명 가능',
-  buttonText: '전자계약 혜택 및 안심 상담 바로가기',
+  buttonText: '전자계약 안심 상담 바로가기',
 
   // Template 2 defaults
   listingComplexName: 'e편한세상월배',
