@@ -3,7 +3,7 @@ import { ArrowUpRight, Car, Bus, Train } from 'lucide-react';
 import { REALTOR_INFO } from '../data/mockData';
 
 export const BomnalContactSection: React.FC = () => {
-  const naverMapUrl = `https://map.naver.com/v5/search/${encodeURIComponent(REALTOR_INFO.address)}`;
+  const kakaoMapUrl = `https://map.kakao.com/?urlX=844113.0000000417&urlY=650025.0000000023&urlLevel=3&itemId=27547531&q=%EB%B4%84%EB%82%A0%EA%B3%B5%EC%9D%B8%EC%A4%91%EA%B0%9C%EC%82%AC%EC%82%AC%EB%AC%B4%EC%86%8C&srcid=27547531&map_type=TYPE_MAP`;
 
   return (
     <section id="contact" className="py-20 sm:py-28 bg-white border-t border-[#E5E5E5] scroll-mt-16 text-[#141414]">
@@ -81,15 +81,15 @@ export const BomnalContactSection: React.FC = () => {
                 대구광역시 달서구 월성로 132, e편한세상월배 상가동 B103호
               </div>
 
-              {/* NAVER MAP LINK */}
+              {/* KAKAO MAP LINK */}
               <div className="pt-0.5">
                 <a
-                  href={naverMapUrl}
+                  href={kakaoMapUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 text-[11px] font-bold font-serif-luxury tracking-[0.2em] text-[#141414] border-b border-[#141414] pb-0.5 hover:text-[#7A0016] hover:border-[#7A0016] transition-colors uppercase"
                 >
-                  <span>NAVER MAP</span>
+                  <span>KAKAO MAP</span>
                   <ArrowUpRight className="w-2.5 h-2.5" />
                 </a>
               </div>
