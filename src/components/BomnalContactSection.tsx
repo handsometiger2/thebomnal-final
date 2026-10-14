@@ -3,7 +3,7 @@ import { ArrowUpRight, Car, Bus, Train } from 'lucide-react';
 import { REALTOR_INFO } from '../data/mockData';
 
 export const BomnalContactSection: React.FC = () => {
-  const kakaoMapUrl = `https://place.map.kakao.com/27547531`;
+  const kakaoMapUrl = `https://map.kakao.com/?mapJson=%7B%22mapCenterX%22%3A844113%2C%22mapCenterY%22%3A650025%2C%22mapLevel%22%3A3%2C%22coordinate%22%3A%22wcongnamul%22%2C%22map_type%22%3A%22TYPE_MAP%22%2C%22map_hybrid%22%3A%22false%22%2C%22markInfo%22%3A%5B%7B%22coordinate%22%3A%22wcongnamul%22%2C%22x%22%3A844113%2C%22y%22%3A650025%2C%22content%22%3A%22%EB%B4%84%EB%82%A0%EA%B3%B5%EC%9D%B8%EC%A4%91%EA%B0%9C%EC%82%AC%EC%82%AC%EB%AC%B4%EC%86%8C%22%7D%5D%7D`;
 
   return (
     <section id="contact" className="py-20 sm:py-28 bg-white border-t border-[#E5E5E5] scroll-mt-16 text-[#141414]">
